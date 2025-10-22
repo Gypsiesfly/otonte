@@ -1,0 +1,94 @@
+"use client"
+
+import Link from "next/link"
+import { useState, useEffect } from "react"
+
+export default function MusicPage() {
+  const [stripeColor, setStripeColor] = useState("#3B82F6")
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+      const scrollPercentage = Math.min(scrollPosition / maxScroll, 1)
+
+      // Interpolate between three colors based on scroll position
+      let r, g, b
+
+      if (scrollPercentage < 0.5) {
+        // First half: transition from blue (#3B82F6) to red (#F63B3B)
+        const localProgress = scrollPercentage * 2
+        r = Math.round(59 + (246 - 59) * localProgress)
+        g = Math.round(130 + (59 - 130) * localProgress)
+        b = Math.round(246 + (59 - 246) * localProgress)
+      } else {
+        // Second half: transition from red (#F63B3B) to yellow (#FFC03A)
+        const localProgress = (scrollPercentage - 0.5) * 2
+        r = Math.round(246 + (255 - 246) * localProgress)
+        g = Math.round(59 + (192 - 59) * localProgress)
+        b = Math.round(59 + (58 - 59) * localProgress)
+      }
+
+      setStripeColor(`rgb(${r}, ${g}, ${b})`)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    handleScroll()
+
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  const tabs = [
+    { id: "tech", number: "1", label: "tech", href: "/", color: "bg-white text-black" },
+    { id: "music", number: "2", label: "music", href: "/music", color: "bg-[#3b82f6] text-white" },
+    { id: "film", number: "3", label: "film", href: "/film", color: "bg-[#ffc03a] text-black" },
+  ]
+
+  return (
+    <div className="min-h-screen bg-white">
+      <div
+        className="fixed right-0 top-0 bottom-0 w-3 z-50 transition-colors duration-300 ease-out"
+        style={{ backgroundColor: stripeColor }}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8">
+        <div className="flex gap-1 sm:gap-2 items-end relative ml-4 sm:ml-8 lg:ml-12 overflow-x-auto">
+          {/* Tech tab - behind music tab */}
+          <Link
+            href={tabs[0].href}
+            className="px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 font-mono text-xs sm:text-sm border border-black border-b-0 rounded-tl-lg sm:rounded-tl-xl rounded-tr-lg sm:rounded-tr-xl bg-white text-black relative z-10 whitespace-nowrap"
+          >
+            <span className="font-bold">{tabs[0].number}</span>
+            <span className="ml-2 sm:ml-3 lg:ml-4">{tabs[0].label}</span>
+          </Link>
+
+          {/* Music tab - active, highest z-index */}
+          <Link
+            href={tabs[1].href}
+            className="px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 font-mono text-xs sm:text-sm border border-black border-b-0 rounded-tl-lg sm:rounded-tl-xl rounded-tr-lg sm:rounded-tr-xl bg-[#3b82f6] text-white relative z-30 whitespace-nowrap"
+          >
+            <span className="font-bold">{tabs[1].number}</span>
+            <span className="ml-2 sm:ml-3 lg:ml-4">{tabs[1].label}</span>
+          </Link>
+
+          {/* Film tab - behind music tab */}
+          <Link
+            href={tabs[2].href}
+            className="px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 font-mono text-xs sm:text-sm border border-black border-b-0 rounded-tl-lg sm:rounded-tl-xl rounded-tr-lg sm:rounded-tr-xl bg-[#ffc03a] text-black relative z-10 whitespace-nowrap"
+          >
+            <span className="font-bold">{tabs[2].number}</span>
+            <span className="ml-2 sm:ml-3 lg:ml-4">{tabs[2].label}</span>
+          </Link>
+        </div>
+      </div>
+
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+        <div className="border border-black bg-[#3b82f6] text-white p-6 sm:p-8 lg:p-12 -mt-[1px] min-h-[300px] sm:min-h-[350px] lg:min-h-[400px] flex items-center justify-center">
+          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-center md:text-center lg:text-left text-center">
+            Music Section - Coming Soon
+          </h1>
+        </div>
+      </section>
+    </div>
+  )
+}
