@@ -4,7 +4,8 @@ import type React from "react"
 
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { Folder, Twitter } from "lucide-react"
 import Image from "next/image"
 
@@ -19,6 +20,9 @@ export default function Portfolio() {
   const [folderIconColor, setFolderIconColor] = useState("#000000")
   const [overlayVisible, setOverlayVisible] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  const [animatedTexts, setAnimatedTexts] = useState<Set<number>>(new Set())
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -143,7 +147,6 @@ export default function Portfolio() {
     { name: "Bubble", src: "/images/bubble-icon.svg" },
     { name: "WordPress", src: "/images/wordpress-icon.svg" },
     { name: "Elementor", src: "/images/elementor-icon.svg" },
-    { name: "Canva", src: "/images/canva-logo.svg" },
   ]
 
   const portfolioItems = [
@@ -165,6 +168,41 @@ export default function Portfolio() {
     })
   }
 
+  useEffect(() => {
+    // Initialize audio
+    audioRef.current = new Audio('/scribble_short-104286.mp3')
+    audioRef.current.volume = 0.5
+
+    // Observer for handwriting elements
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting && !animatedTexts.has(index)) {
+            const element = entry.target as HTMLElement
+            element.classList.add('scribble-animate')
+            
+            // Play sound if enabled
+            if (soundEnabled && audioRef.current) {
+              audioRef.current.currentTime = 0
+              audioRef.current.play().catch(() => {})
+            }
+            
+            setAnimatedTexts(prev => new Set(prev).add(index))
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+
+    // Observe all handwriting elements
+    const handwritingElements = document.querySelectorAll('.handwriting')
+    handwritingElements.forEach((el) => observer.observe(el))
+
+    return () => {
+      handwritingElements.forEach((el) => observer.unobserve(el))
+    }
+  }, [soundEnabled, animatedTexts])
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 md:pt-8">
@@ -175,7 +213,7 @@ export default function Portfolio() {
               href={tab.href}
               className={`px-3 md:px-6 py-2 md:py-3 font-mono text-xs md:text-sm border border-black rounded-tl-xl rounded-tr-xl ${
                 tab.color
-              } relative ${activeTab === tab.id ? "z-30 border-b-0" : "z-10"} transition-colors whitespace-nowrap`}
+              } relative ${activeTab === tab.id ? "z-30 border-b-0" : "z-10"} whitespace-nowrap`}
             >
               <span className="font-bold">{tab.number}</span>
               <span className="ml-2 md:ml-4">{tab.label}</span>
@@ -188,13 +226,85 @@ export default function Portfolio() {
         <div className="max-w-7xl mx-auto pl-4 md:pl-8 pr-4 md:pr-8 lg:pr-0 relative z-20">
           <div className="border border-black p-6 md:p-12 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center md:items-center lg:items-center -mt-[1px] border-r lg:border-r-0">
             <div className="flex items-center justify-center md:justify-center lg:justify-start">
-              <Image
-                src="/images/ascii-portrait.png"
-                alt="ASCII Art Portrait"
-                width={400}
-                height={600}
-                className="w-full max-w-[200px] md:max-w-xs h-auto"
-              />
+              <pre className="font-mono text-[5px] leading-tight overflow-hidden text-black dark:text-white w-full max-w-xs md:max-w-md h-auto">
+{`@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%##*******###%%@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%#####**+++++++**###%%@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%######**+=======++***###%@@@@%%%%%%%%%%%@%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%######**++=-----===++***###%@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%#######***+=----====++****###%@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%########**+========+++*****##%@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%#####*****+==----==++*****###%%@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%####****+++=------==++****###%%@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%@@%%%%%#**+++++=+*##*******####%@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%###**#%%@@@@@%#######%@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%@@@@@%####%%@@%%#***######%@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%#*++##%%@@%%##%%%%%##%@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%#*==+++*%%%%%%%@%%###%@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%###%#*+==+++=+*##%%#****##%%#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%###########*+==+++========++**##%%@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%###**###%%#*=-=++++===-==++***##%%#%#%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%###########*+====+++===+++***##%##*##%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%#####%@@@%%#%%#**==++****###%%****%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@@@@%%%##%@@@@@@@@@@%+==+**####%%%#**#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%@@@@@@@%%%%%%@@%%####*+++++*###%%%%%@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%@@@@@@@@@@@@%%%##**++**#######%%%%%@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%@@@@@@@@@@@@@@@@%%%%%%#%%###%%%%%@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%@@@@@@@@@@@%%#%%#***#######%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%######%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%######%%%%@@%%%%#%########%%%%%%%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@%%%%@@@@@@@@@@@@@@@@@@@@@@%%%%%%###%%@@@@%%%%%#######***######%%%%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%@@@@@@%%%%%%########****###**##%%%%%%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%########*##*****#*#####%%%%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%@%############***###***#####%%%%%%%@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%##############*##%#***####*##%%%%@
+@@@@@@@@@@@@@@%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%@%%#######%%##%#***#%%****##*****#%%@
+@@@@@@@%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%#####%%%%####%##*##%%***#*********#@
+@@@@%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%############%%##**#%%#***********##@
+@%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%##############%#**#%%#**********##*@
+@%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%###############%####%%###*******####@
+@@%%%%%#%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%@@%##############%%####%%#********####*@
+@@%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%##%%###############%%####%%#*******#####*@
+%@@%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%####%%##############%%%####%%#*****#######*@
+%%@%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%###%%%##############%@####%%#############*@
+%%@@%%%%%%#%%%%%%%%%@@@@@@@@@@@@@@@@@%%@@@@@@@%%%###%%%%%%%%%@%###############%@####%%##*####%%###**@
+%%%@@%%@%%%%%%%%%%%%@@@@@@@@@@@@@@@%%%%%@@@@@%%@####%%%%%%%%@@%###############%@%##%%%#######%#####*@
+%%%%@%%%@%#%%%%%%%%%@@@@@@@@@@@@@@%%%%%%%@@@@%%%%%*%%%%%%%%%@@%#############%%%@%##%%%##%%%#%%%%####@
+%%%%@@@%@@%%%%%%%%%%@@@@@@@@@@@@@@%%%%%%%@@@@@%%%@#%%%%%%%%@@@%##############%%@%##%%%%%@@%%%%%#%###@
+@%%%%@@@%@@%%%%%%%%%%%@@@@@@@@@@@@%%%%%%%%@@@@%%%@*%%%%%%%%@@@%############%#%%@%##%%%%@@@%%%%%%####@
+@@%%%%@@@@@@%%%%%%%%%%@@@@@@@@@@@@%%%%%%%#+%@%%%%+-#%%%%%%@@@@%#########%#%%%%@@%#%%%%@@@@%@%%%%%%%%@
+%@@@%%%%@@@@%%%%%%%%%%%@@@@@@@@@@@%%%%%%##+-*%@@@%%%%%%%%@@@@%%##########%%%%%@%%%%%%%@@@@@@@%%%%%%#@
+%%%@@@@%%@@@%%%%%%%%%%%@@@@@@@@@@@%%%%%%%%#=--=*%%@@@@@@@%+=*%%#######%%%%%%%%@%%%%%%%@@@@@@@@@@@%%@@
+%@%%@@@@@@@@@%%%%%%%%%%%@@@@@@@@@@%%%%%%%##+=--:::-====-:::-#%%#########%%%%%@@%%%%%%%@@@@@@@@@%%%%%@
+@%@@%%%%@@@@@%%%%%%%%%%@@@@@@@@@@@@%%%%%%###*=----:--::::--+%%%%%#######@@@%%@@%%%%%%@@@@@@@@%%@@@@%@
+@@@%@@@%%@@@@%%%%%%%%%%%@@@@@@@@@@@@%%%%%###*+=++==----==++#%%%%#%###%%%@@@@@@@%%%%%%@@@@@@@@@@@@%%@@
+%%@@@%@@@@@@@@%%%%%%%%%%@@@@@@@@@@@@@%%%#%###**===---====+*%@%%%####%%#@@@@@@@@%%%%%%@@@@@@@@@%%%@%%@
+@%%%%%%@@@@@@@@@@@%%%%%%%@@@@@@@@@@@@@#%%%#%#+**++======++#%@%%%####%%%@@@@@@@@%%%%%%@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@%%%%%%%%@@@@@@@@@@@@@%###%%#*=+**+=====+*#%%%%%####%%%@@@@@@@@@%%%%%@@@@@@@@@@@@%%@@
+%%%%@@@@@@@@@@@@%%%%%%%%%%@@@@@@@@@@@@@%##%#%#==++++===++*#%@%%%%%%%%%@@@@@@@@@@%%%%@@@@@@@@@@@@@@%%@
+@%%%%%%%%@@@@@@@%%%%%%%%%%%@@%@@@@@@@@@@%###%#+-=++++=++**#@@%%%#%%%%%%%@@@@@@@%%%%%@@@@@@@@@@%%%%%#@
+%@@%#%%%%%%@@@@@@%%%%%%%%%@@@@@@@@@@@@@@@%##%%*--=++++++**%@@%%%#%%%%%%%%%@@@@@@%%%%@@@@@@%%%%%%%#%%@`}
+              </pre>
             </div>
 
             <div className="space-y-4 md:space-y-6 text-center md:text-center lg:text-left">
@@ -205,12 +315,16 @@ export default function Portfolio() {
                 I am a Product designer with five years of design experience , wordpress and web development
               </p>
               <div className="flex justify-center md:justify-center lg:justify-start">
-                <Button
-                  variant="outline"
-                  className="border border-black hover:bg-black hover:text-white transition-colors bg-transparent"
+                <Link
+                  href="/Otonte_Briggs_CV_Updated.pdf"
+                  download="Otonte_Briggs_CV.pdf"
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "border border-black hover:bg-black hover:text-white bg-transparent rounded-none",
+                  )}
                 >
                   View my resume
-                </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -242,16 +356,9 @@ export default function Portfolio() {
           ))}
         </div>
 
-        <div ref={buttonsRef} className="flex justify-center gap-3 md:gap-4 flex-wrap">
+        <div ref={buttonsRef} className="flex justify-center gap-3 md:gap-4 flex-wrap mt-8 md:mt-12">
           <button
-            className={`px-4 md:px-6 py-2 md:py-3 bg-[#f63b3b] text-white rounded-full flex items-center gap-2 hover:opacity-90 text-sm md:text-base ${
-              buttonsVisible ? "w-auto opacity-100" : "w-0 opacity-0 overflow-hidden px-0"
-            }`}
-            style={{
-              transition: buttonsVisible
-                ? "width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)"
-                : "none",
-            }}
+            className="px-4 md:px-6 py-2 md:py-3 bg-[#f63b3b] text-white rounded-full flex items-center gap-2 hover:opacity-90 text-sm md:text-base"
           >
             <Image
               src="/images/web-design-icon.svg"
@@ -260,17 +367,10 @@ export default function Portfolio() {
               height={24}
               className="w-5 h-5 md:w-6 md:h-6"
             />
-            <span className={buttonsVisible ? "inline" : "hidden"}>Web Design</span>
+            <span>Web Design</span>
           </button>
           <button
-            className={`px-4 md:px-6 py-2 md:py-3 bg-[#3b82f6] text-white rounded-full flex items-center gap-2 hover:opacity-90 text-sm md:text-base ${
-              buttonsVisible ? "w-auto opacity-100" : "w-0 opacity-0 overflow-hidden px-0"
-            }`}
-            style={{
-              transition: buttonsVisible
-                ? "width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s, opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s, padding 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s"
-                : "none",
-            }}
+            className="px-4 md:px-6 py-2 md:py-3 bg-[#3b82f6] text-white rounded-full flex items-center gap-2 hover:opacity-90 text-sm md:text-base"
           >
             <Image
               src="/images/uiux-design-icon.svg"
@@ -279,17 +379,10 @@ export default function Portfolio() {
               height={24}
               className="w-5 h-5 md:w-6 md:h-6"
             />
-            <span className={buttonsVisible ? "inline" : "hidden"}>UI/UX Design</span>
+            <span>UI/UX Design</span>
           </button>
           <button
-            className={`px-4 md:px-6 py-2 md:py-3 bg-[#ffc03a] text-black rounded-full flex items-center gap-2 hover:opacity-90 text-sm md:text-base ${
-              buttonsVisible ? "w-auto opacity-100" : "w-0 opacity-0 overflow-hidden px-0"
-            }`}
-            style={{
-              transition: buttonsVisible
-                ? "width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s, opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s, padding 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s"
-                : "none",
-            }}
+            className="px-4 md:px-6 py-2 md:py-3 bg-[#ffc03a] text-white rounded-full flex items-center gap-2 hover:opacity-90 text-sm md:text-base"
           >
             <Image
               src="/images/brand-design-icon.svg"
@@ -298,7 +391,7 @@ export default function Portfolio() {
               height={24}
               className="w-5 h-5 md:w-6 md:h-6"
             />
-            <span className={buttonsVisible ? "inline" : "hidden"}>Brand Design</span>
+            <span>Brand Design</span>
           </button>
         </div>
       </section>
@@ -397,6 +490,27 @@ export default function Portfolio() {
           </div>
         </div>
       </section>
+
+      {/* Fixed Sound Toggle Button */}
+      <button
+        onClick={() => setSoundEnabled(!soundEnabled)}
+        className="fixed bottom-6 right-6 w-12 h-12 bg-white border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors z-50"
+        aria-label="Toggle sound"
+      >
+        {soundEnabled ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        )}
+      </button>
     </div>
   )
 }
