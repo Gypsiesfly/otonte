@@ -8,6 +8,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Folder, Twitter } from "lucide-react"
 import Image from "next/image"
+import SoundTogglePopup from "@/components/SoundTogglePopup"
 
 export default function Portfolio() {
   const [activeTab, setActiveTab] = useState("tech")
@@ -170,28 +171,37 @@ export default function Portfolio() {
 
   useEffect(() => {
     // Initialize audio
-    audioRef.current = new Audio('/scribble_short-104286.mp3')
-    audioRef.current.volume = 0.5
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/scribble_short-104286.mp3')
+      audioRef.current.volume = 0.5
+    }
 
     // Observer for handwriting elements
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry, index) => {
-          if (entry.isIntersecting && !animatedTexts.has(index)) {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
             const element = entry.target as HTMLElement
-            element.classList.add('scribble-animate')
+            const elementId = element.getAttribute('data-text-id')
             
-            // Play sound if enabled
-            if (soundEnabled && audioRef.current) {
-              audioRef.current.currentTime = 0
-              audioRef.current.play().catch(() => {})
+            if (elementId && !animatedTexts.has(parseInt(elementId))) {
+              // Add CSS animation class for color reveal
+              element.classList.add('scribble-animate')
+              
+              // Play sound if enabled
+              if (soundEnabled && audioRef.current) {
+                audioRef.current.currentTime = 0
+                audioRef.current.play().catch((error) => {
+                  console.log('Audio play failed:', error)
+                })
+              }
+              
+              setAnimatedTexts(prev => new Set(prev).add(parseInt(elementId)))
             }
-            
-            setAnimatedTexts(prev => new Set(prev).add(index))
           }
         })
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     )
 
     // Observe all handwriting elements
@@ -205,6 +215,8 @@ export default function Portfolio() {
 
   return (
     <div className="min-h-screen bg-white">
+      <SoundTogglePopup onToggle={setSoundEnabled} />
+      
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 md:pt-8">
         <div className="flex gap-1 md:gap-2 items-end relative ml-4 md:ml-12 overflow-x-auto">
           {tabs.map((tab) => (
@@ -224,7 +236,7 @@ export default function Portfolio() {
 
       <section className="relative">
         <div className="max-w-7xl mx-auto pl-4 md:pl-8 pr-4 md:pr-8 lg:pr-0 relative z-20">
-          <div className="border border-black p-6 md:p-12 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center md:items-center lg:items-center -mt-[1px] border-r lg:border-r-0">
+          <div className="border border-black p-6 md:p-12 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-2 items-center md:items-center lg:items-center -mt-[1px] border-r lg:border-r-0">
             <div className="flex items-center justify-center md:justify-center lg:justify-start">
               <pre className="font-mono text-[5px] leading-tight overflow-hidden text-black dark:text-white w-full max-w-xs md:max-w-md h-auto">
 {`@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -308,10 +320,10 @@ export default function Portfolio() {
             </div>
 
             <div className="space-y-4 md:space-y-6 text-center md:text-center lg:text-left">
-              <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl leading-tight text-balance">
+              <h1 className="font-serif text-3xl md:text-5xl lg:text-[81px] leading-tight text-balance">
                 Hi, I'm Otonte, and i'm passionate about creation.
               </h1>
-              <p className="text-[#3b82f6] text-lg md:text-xl handwriting">
+              <p className="text-[#3b82f6] text-lg md:text-xl handwriting" data-text-id="0">
                 I am a Product designer with five years of design experience , wordpress and web development
               </p>
               <div className="flex justify-center md:justify-center lg:justify-start">
@@ -338,7 +350,7 @@ export default function Portfolio() {
 
       <section className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-16">
         <h2 className="font-serif text-3xl md:text-5xl text-center mb-3 md:mb-4">My stack</h2>
-        <p className="text-[#3b82f6] text-lg md:text-xl text-center handwriting mb-8 md:mb-12">
+        <p className="text-[#3b82f6] text-lg md:text-xl text-center handwriting mb-8 md:mb-12" data-text-id="1">
           These are languages or applications i am very familiar with
         </p>
 
@@ -356,7 +368,7 @@ export default function Portfolio() {
           ))}
         </div>
 
-        <div ref={buttonsRef} className="flex justify-center gap-3 md:gap-4 flex-wrap mt-8 md:mt-12">
+        <div ref={buttonsRef} className="flex justify-center gap-3 md:gap-4 flex-wrap" style={{ marginTop: '4em' }}>
           <button
             className="px-4 md:px-6 py-2 md:py-3 bg-[#f63b3b] text-white rounded-full flex items-center gap-2 hover:opacity-90 text-sm md:text-base"
           >
@@ -398,7 +410,7 @@ export default function Portfolio() {
 
       <section className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-16">
         <h2 className="font-serif text-3xl md:text-5xl text-center mb-3 md:mb-4">My portfolio</h2>
-        <p className="text-[#3b82f6] text-lg md:text-xl text-center handwriting mb-8 md:mb-12">
+        <p className="text-[#3b82f6] text-lg md:text-xl text-center handwriting mb-8 md:mb-12" data-text-id="2">
           Some jobs finished by me
         </p>
 
@@ -426,7 +438,7 @@ export default function Portfolio() {
                     scale: overlayVisible ? "1" : "0.95",
                   }}
                 >
-                  <div className="relative w-32 h-32 md:w-48 md:h-48 bg-black/10 backdrop-blur-sm rounded-lg border border-black/20 overflow-hidden transition-transform duration-100 ease-out">
+                  <div className="relative w-32 h-32 md:w-48 md:h-48 bg-black/10 backdrop-blur-sm border border-black/20 overflow-hidden transition-transform duration-100 ease-out">
                     <Image
                       src={`/portfolio-project.png?key=u7o9z&height=200&width=200&query=portfolio project ${currentImageIndex + 1}`}
                       alt={`${item.name} preview ${currentImageIndex + 1}`}
@@ -458,38 +470,19 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section className="bg-black text-white py-8 md:py-16 mt-8 md:mt-16">
+      {/* Footer */}
+      <footer className="border-t border-black py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <h2 className="font-serif text-3xl md:text-5xl text-center text-[#ffc03a] mb-8 md:mb-12">My socials</h2>
-          <div className="flex justify-center items-center gap-6 md:gap-8">
-            <a
-              href="https://behance.net"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-200 transition-all duration-300"
-              aria-label="Behance"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-6 h-6 md:w-8 md:h-8"
-              >
-                <path d="M6.5 4.5h3.8c1.7 0 3 1.3 3 3 0 1-.5 1.9-1.3 2.4.9.5 1.5 1.5 1.5 2.6 0 1.7-1.3 3-3 3H6.5V4.5zm2 4.5h1.8c.6 0 1-.4 1-1s-.4-1-1-1H8.5v2zm0 4.5h1.8c.6 0 1-.4 1-1s-.4-1-1-1H8.5v2zm6.5-7h5v1.5h-5V6.5zm1.5 4c-1.9 0-3.5 1.6-3.5 3.5s1.6 3.5 3.5 3.5c1.5 0 2.8-.9 3.3-2.2h-2.1c-.3.4-.8.7-1.2.7-.8 0-1.5-.6-1.6-1.5h5.1c0-.2.1-.5.1-.8 0-1.9-1.6-3.2-3.6-3.2zm-1.5 2.5c.2-.8.9-1.5 1.5-1.5s1.3.7 1.5 1.5h-3z" />
-              </svg>
-            </a>
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-200 transition-all duration-300"
-              aria-label="Twitter"
-            >
-              <Twitter className="w-6 h-6 md:w-8 md:h-8" />
-            </a>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm font-mono">
+              © {new Date().getFullYear()} @otontebriggs
+            </p>
+            <p className="text-sm font-serif italic text-gray-600">
+              "Ride for ruin" - Théoden King
+            </p>
           </div>
         </div>
-      </section>
+      </footer>
 
       {/* Fixed Sound Toggle Button */}
       <button
