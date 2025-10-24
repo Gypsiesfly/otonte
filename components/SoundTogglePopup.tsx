@@ -32,7 +32,7 @@ export default function SoundTogglePopup({ onToggle }: SoundTogglePopupProps) {
           Would you like to enable sound effects for a more immersive experience?
         </p>
         
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-col md:flex-row gap-4 justify-center">
           <button
             onClick={() => handleToggle(true)}
             className="px-6 py-3 bg-black text-white border border-black hover:bg-gray-800 flex items-center gap-2"
